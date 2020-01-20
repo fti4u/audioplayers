@@ -130,7 +130,10 @@ const float _defaultPlaybackRate = 1.0;
   NSLog(@"%@ => call %@, playerId %@", osName, call.method, playerId);
 
   typedef void (^CaseBlock)(void);
-
+  NSMutableDictionary * playerInfo = players[playerId];
+  if ([playerInfo[@"isPlaying"] boolValue]) {
+    return;
+  }
   // Squint and this looks like a proper switch!
   NSDictionary *methods = @{
                 @"startHeadlessService":
@@ -686,6 +689,9 @@ const float _defaultPlaybackRate = 1.0;
           [_callbackChannel invokeMethod:@"audio.onNotificationBackgroundPlayerStateChanged" arguments:@{@"playerId": playerId, @"updateHandleMonitorKey": @(_updateHandleMonitorKey), @"value": @"completed"}];
       }
   #endif
+  if (![ playerInfo[@"looping"] boolValue]) {
+    [ self seek:playerId time:CMTimeMakeWithSeconds(0,1) ];
+  }
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath
